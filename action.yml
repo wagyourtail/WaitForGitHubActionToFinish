@@ -1,0 +1,21 @@
+name: 'Wait for GitHub Action'
+description: 'Waits for another GitHub Action to finish.'
+inputs:
+  auth:
+    description: 'The GitHub API token.'
+    required: true
+  owner:
+    description: 'The GitHub owner of the repository.'
+    required: true
+  repo:
+    description: 'The name of the repository.'
+    required: true
+  workflowID:
+    description: 'The workflow ID.'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
+branding:
+  icon: 'activity'
+  color: 'blue'
