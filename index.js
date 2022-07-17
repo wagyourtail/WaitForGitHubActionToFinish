@@ -17,19 +17,26 @@ const octokit = new Octokit({
 		"owner": settings.owner,
 		"repo": settings.repo,
 		"workflow_id": settings.workflowID
-	})).data.workflow_runs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+	})).data.workflow_runs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
-	while (latestRun.status !== "completed") {
-		await timeout(30000);
+	if (!latestRun) {
+		console.error("No runs in this workflow.");
 
-		latestRun = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
-			"owner": settings.owner,
-			"repo": settings.repo,
-			"run_id": latestRun.id
-		});
+		success = false;
+	} else {
+		while (latestRun.status !== "completed") {
+			await timeout(30000);
+
+			latestRun = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
+				"owner": settings.owner,
+				"repo": settings.repo,
+				"run_id": latestRun.id
+			});
+		}
+
+		success = latestRun.conclusion === "success";
 	}
 
-	success = latestRun.conclusion === "success";
 
 	process.exit(success ? 0 : 1);
 })();
