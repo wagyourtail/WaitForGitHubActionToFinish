@@ -19,6 +19,9 @@ const octokit = new Octokit({
 		"workflow_id": settings.workflowID
 	})).data.workflow_runs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
+	console.log(`latestRun.id: ${latestRun.id}`);
+	console.log(`latestRun.status: ${latestRun.status}`);
+
 	if (!latestRun) {
 		console.error("No runs in this workflow.");
 
@@ -32,11 +35,14 @@ const octokit = new Octokit({
 				"repo": settings.repo,
 				"run_id": latestRun.id
 			});
+
+			console.log(`latestRun.status: ${latestRun.status}`);
 		}
 
 		success = latestRun.conclusion === "success";
 	}
 
+	console.log(`success: ${success}`);
 
 	process.exit(success ? 0 : 1);
 })();
