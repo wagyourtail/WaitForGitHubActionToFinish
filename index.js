@@ -36,6 +36,7 @@ const octokit = new Octokit({
 				"run_id": latestRun.id
 			});
 
+			console.log(`latestRun.id: ${latestRun.id}`);
 			console.log(`latestRun.status: ${latestRun.status}`);
 		}
 
