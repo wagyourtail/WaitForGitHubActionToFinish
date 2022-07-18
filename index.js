@@ -30,11 +30,11 @@ const octokit = new Octokit({
 		while (latestRun.status !== "completed") {
 			await timeout(30000);
 
-			latestRun = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
+			latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
 				"owner": settings.owner,
 				"repo": settings.repo,
 				"run_id": latestRun.id
-			});
+			})).data;
 
 			console.log(`latestRun.id: ${latestRun.id}`);
 			console.log(`latestRun.status: ${latestRun.status}`);
