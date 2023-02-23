@@ -1,7 +1,7 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
 
-const settings = ["auth", "owner", "repo", "workflowID"].reduce((obj, key) => {
+const settings = ["auth", "owner", "repo", "workflowID", "runID"].reduce((obj, key) => {
 	obj[key] = core.getInput(key);
 	return obj;
 }, {});
@@ -33,11 +33,11 @@ const octokit = new Octokit({
 			latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
 				"owner": settings.owner,
 				"repo": settings.repo,
-				"run_id": latestRun.id
+				"run_id": settings.runID ?? latestRun.id
 			})).data;
 
-			console.log(`latestRun.id: ${latestRun.id}`);
-			console.log(`latestRun.status: ${latestRun.status}`);
+			console.log(`runID: ${settings.runID ?? latestRun.id}`);
+			console.log(`run.status: ${latestRun.status}`);
 		}
 
 		success = latestRun.conclusion === "success";
