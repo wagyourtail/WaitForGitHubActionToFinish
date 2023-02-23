@@ -1,7 +1,7 @@
 const { Octokit } = require("@octokit/rest");
 const core = require("@actions/core");
 
-const settings = ["auth", "owner", "repo", "workflowID", "runID"].reduce((obj, key) => {
+const settings = ["auth", "owner", "repo", "runID"].reduce((obj, key) => {
 	obj[key] = core.getInput(key);
 	return obj;
 }, {});
@@ -11,37 +11,21 @@ const octokit = new Octokit({
 });
 
 (async () => {
-	let success;
+	let latestRun;
+	while (latestRun.status !== "completed") {
+		await timeout(30000);
 
-	let latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
-		"owner": settings.owner,
-		"repo": settings.repo,
-		"workflow_id": settings.workflowID
-	})).data.workflow_runs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+		latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
+			"owner": settings.owner,
+			"repo": settings.repo,
+			"run_id": settings.runID
+		})).data;
 
-	console.log(`latestRun.id: ${latestRun.id}`);
-	console.log(`latestRun.status: ${latestRun.status}`);
-
-	if (!latestRun) {
-		console.error("No runs in this workflow.");
-
-		success = false;
-	} else {
-		while (latestRun.status !== "completed") {
-			await timeout(30000);
-
-			latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
-				"owner": settings.owner,
-				"repo": settings.repo,
-				"run_id": settings.runID ?? latestRun.id
-			})).data;
-
-			console.log(`runID: ${settings.runID ?? latestRun.id}`);
-			console.log(`run.status: ${latestRun.status}`);
-		}
-
-		success = latestRun.conclusion === "success";
+		console.log(`runID: ${settings.runID}`);
+		console.log(`run.status: ${latestRun.status}`);
 	}
+
+	let success = latestRun.conclusion === "success";
 
 	console.log(`success: ${success}`);
 
